@@ -3,6 +3,7 @@ package managedriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
@@ -13,21 +14,32 @@ public class DriverManager {
     public static void initializeDriver(String browserName) {
         if (driver.get() == null) {
             WebDriver newDriver;
+
             switch (browserName.toLowerCase()) {
                 case "firefox":
                     WebDriverManager.firefoxdriver().setup();
                     newDriver = new FirefoxDriver();
                     break;
+
                 case "edge":
                     WebDriverManager.edgedriver().setup();
                     newDriver = new EdgeDriver();
                     break;
+
                 case "chrome":
                 default:
                     WebDriverManager.chromedriver().setup();
-                    newDriver = new ChromeDriver();
+                    ChromeOptions options = new ChromeOptions();
+                    options.addArguments("--headless=new");
+                    options.addArguments("--no-sandbox");
+                    options.addArguments("--disable-dev-shm-usage");
+                    options.addArguments("--disable-gpu");
+                    options.addArguments("--disable-extensions");
+                    options.addArguments("--remote-allow-origins=*");
+                    newDriver = new ChromeDriver(options);
                     break;
             }
+
             newDriver.manage().window().maximize();
             driver.set(newDriver);
         }

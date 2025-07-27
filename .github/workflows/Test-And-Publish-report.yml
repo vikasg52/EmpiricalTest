@@ -1,23 +1,27 @@
-name: Run Tests and Publish Report
+name: Run Cucumber Tests and Publish Report
 
 on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  test-and-report:
+  test-and-publish-report:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
 
       - name: Cache Maven packages
         uses: actions/cache@v3
@@ -27,14 +31,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Run Maven tests
-        run: mvn clean test
+      - name: Build and Test with Maven
+        run: mvn clean test verify
 
-      - name: Generate Cucumber Report
-        run: mvn verify
-
-      - name: Deploy report to GitHub Pages
+      - name: Upload Cucumber HTML Report to GitHub Pages
+        if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/cucumber-html-reports
+          publish_branch: gh-pages
+          force_orphan: true
